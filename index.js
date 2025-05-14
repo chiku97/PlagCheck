@@ -19,7 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve the form
 app.get('/', (req, res) => {
-  fs.writeFileSync(path.join(__dirname, 'reports', 'report.html'), ""); 
   res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
@@ -61,7 +60,8 @@ app.post('/compare', async (req, res) => {
 
 // Serve the report
 app.get('/report', (req, res) => {
-  const reportPath = path.resolve('./reports', 'report.html'); // Use os.tmpdir() for the temp directory
+    const tempDir = os.tmpdir();
+  const reportPath = path.resolve(tempDir, 'report.html'); // Use os.tmpdir() for the temp directory
   if (fs.existsSync(reportPath)) {
     res.sendFile(reportPath);
   } else {
