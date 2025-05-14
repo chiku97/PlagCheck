@@ -49,8 +49,6 @@ function normalize(code) {
     .replace(/\/\/.*$/gm, '') // Remove single-line comments
     .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
     .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
-    .replace(/;+/g, ';') // Remove extra semicolons
-    .replace(/,\s*}/g, '}') // Remove trailing commas in objects
     .trim();
 
   console.log("Normalized Code:", normalized); // Debugging
@@ -134,7 +132,7 @@ export async function compareRepos(repoAPath, repoBPath) {
         for (const fA of functionsA) {
           for (const fB of functionsB) {
             const similarity = getSimilarity(fA, fB);
-            if (similarity > 50) {
+            if (similarity > 10) {
               matches.push({
                 fileA,
                 fileB,
@@ -147,7 +145,7 @@ export async function compareRepos(repoAPath, repoBPath) {
         }
       } else if (/\.(html|css)$/.test(fileA)) {
         const similarity = getSimilarity(codeA, codeB);
-        if (similarity > 50) {
+        if (similarity > 10) {
           matches.push({
             fileA,
             fileB,
