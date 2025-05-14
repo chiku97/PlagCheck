@@ -4,7 +4,7 @@ import path from 'path';
 
 
 export async function cloneRepos(repoA, repoB) {
-    const baseDir = path.join('/tmp', 'repos');
+    const baseDir = path.join('repos','..', 'repos');
   const repoAPath = path.join(baseDir, 'repoA');
   const repoBPath = path.join(baseDir, 'repoB');
 

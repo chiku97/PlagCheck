@@ -163,3 +163,17 @@ export async function compareRepos(repoAPath, repoBPath) {
 }
 
 
+export function checkSimilarity(fileA, fileB, codeA, codeB, matches) {
+    if (/\.(html|css)$/.test(fileA)) {
+      const similarity = getSimilarity(codeA, codeB);
+      if (similarity > 0) {
+        matches.push({
+          fileA,
+          fileB,
+          similarity: similarity.toFixed(2),
+          snippetA: codeA.slice(0, 200),
+          snippetB: codeB.slice(0, 200),
+        });
+      }
+    }
+  }
