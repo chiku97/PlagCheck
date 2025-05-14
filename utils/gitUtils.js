@@ -2,20 +2,32 @@ import simpleGit from 'simple-git';
 import fs from 'fs-extra';
 import path from 'path';
 
+export async function cloneRepos(repoAUrl, repoBUrl) {
+  const baseDir = path.join('repos', '..', 'repos');
 
-export async function cloneRepos(repoA, repoB) {
-    const baseDir = path.join('repos','..', 'repos');
-  const repoAPath = path.join(baseDir, 'repoA');
-  const repoBPath = path.join(baseDir, 'repoB');
+  // Extract repository names from URLs
+  const repoAName = path.basename(repoAUrl, '.git');
+  const repoBName = path.basename(repoBUrl, '.git');
+
+  // Create paths for the repositories
+  const repoAPath = path.join(baseDir, repoAName);
+  const repoBPath = path.join(baseDir, repoBName);
 
   const git = simpleGit();
 
+  // Ensure the base directory exists and clean it up
   await fs.remove(baseDir);
   await fs.ensureDir(baseDir);
-  await git.clone(repoA, repoAPath);
-  await git.clone(repoB, repoBPath);
 
-  return { repoAPath, repoBPath };
+  // Clone the repositories
+  console.log(`Cloning ${repoAUrl} into ${repoAPath}`);
+  await git.clone(repoAUrl, repoAPath);
+
+  console.log(`Cloning ${repoBUrl} into ${repoBPath}`);
+  await git.clone(repoBUrl, repoBPath);
+  console.log("somejebdjbj",repoAUrl)
+
+  return { repoAPath, repoBPath, repoAName, repoBName, repoAUrl, repoBUrl };
 }
 
 

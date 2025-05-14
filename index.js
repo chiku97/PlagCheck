@@ -4,7 +4,8 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { cloneRepos } from './utils/gitUtils.js';
 import { compareRepos } from './utils/compareUtils.js';
-import { generateReport } from './utils/reportUtils.js';
+import { generateReport, finalizeReport } from './utils/reportUtils.js'; // Added finalizeReport import
+import os from 'os'; // Import os module for temp directory
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,26 +24,43 @@ app.get('/', (req, res) => {
 
 // Handle form submission
 app.post('/compare', async (req, res) => {
-  const { repoA, repoB } = req.body;
+  const { repos } = req.body;
 
   try {
-    const { repoAPath, repoBPath } = await cloneRepos(repoA, repoB);
-    const matches = await compareRepos(repoAPath, repoBPath);
+    const repoUrls = repos.split(',').map((url) => url.trim());
 
-    console.log(matches)
-    // Generate the report
-    await generateReport(matches);
+    if (repoUrls.length < 2) {
+      return res.status(400).send('Please provide at least two repository URLs.');
+    }
 
-    // Redirect to the report page
+    let isFirstBatch = true;
+
+    for (let i = 0; i < repoUrls.length; i++) {
+      for (let j = i + 1; j < repoUrls.length; j++) {
+        try {
+          const { repoAPath, repoBPath, repoAName, repoBName, repoAUrl, repoBUrl } = await cloneRepos(repoUrls[i], repoUrls[j]);
+          console.log("somethi gbahsbdakbshj", repoBName)
+          const matches = await compareRepos(repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl);
+
+          await generateReport([matches], isFirstBatch);
+          isFirstBatch = false;
+        } catch (error) {
+          console.error(`Error processing repositories: ${repoUrls[i]} and ${repoUrls[j]}`, error);
+        }
+      }
+    }
+
+    await finalizeReport();
     res.redirect('/report');
   } catch (error) {
+    console.error('Error in /compare route:', error);
     res.status(500).send(`<h1>Error</h1><p>${error.message}</p>`);
   }
 });
 
 // Serve the report
 app.get('/report', (req, res) => {
-  const reportPath = path.resolve('reports', 'report.html');
+  const reportPath = path.resolve(os.tmpdir(), 'report.html'); // Use os.tmpdir() for the temp directory
   if (fs.existsSync(reportPath)) {
     res.sendFile(reportPath);
   } else {
