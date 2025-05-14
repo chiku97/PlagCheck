@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve the form
 app.get('/', (req, res) => {
+  fs.writeFileSync(path.join(__dirname, 'reports', 'report.html'), ""); // Added suggested code change
   res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
