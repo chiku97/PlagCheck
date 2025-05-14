@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
-    "test": "npm test",
+    "start": "node index.js",
     "build": "babel . --out-dir dist --ignore node_modules,dist && cp -r public dist/public"
   },
   "author": "",
