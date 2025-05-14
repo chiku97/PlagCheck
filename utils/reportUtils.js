@@ -3,15 +3,11 @@ import path from 'path';
 import os from 'os'; // Import os module for temp directory
 
 export async function generateReport(results, isFirstBatch = false) {
-  // Use os.tmpdir() for a cross-platform temporary directory
   const tempDir = os.tmpdir();
-  const reportPath = path.resolve(tempDir, 'report.html'); 
-  // If this is the first batch, initialize the report with the HTML structure
-  if (isFirstBatch) {
-    const stream = fs.createWriteStream(reportPath);
+  const reportPath = path.join(tempDir, 'report.html');
 
-    // Write the initial HTML structure
-    stream.write(`
+  if (isFirstBatch) {
+    const initialContent = `
       <html>
         <head>
           <title>Repository Comparison Report</title>
@@ -40,50 +36,42 @@ export async function generateReport(results, isFirstBatch = false) {
               </tr>
             </thead>
             <tbody>
-    `);
-
-    stream.end();
+    `;
+    fs.writeFileSync(reportPath, initialContent);
+    console.log(`✅ Initialized report at: ${reportPath}`);
   }
 
-  // Append rows to the report
-  const stream = fs.createWriteStream(reportPath, { flags: 'a' }); // Open in append mode
-  results.forEach((repoResult) => {
-    repoResult.forEach((r) => {
-      stream.write(`
-        <tr class="${r.similarity > 80 ? 'high' : ''}">
-          <td>${r.repoAName || 'N/A'}</td>
-          <td><a href="${r.repoAUrl || '#'}">${r.repoAUrl || 'N/A'}</a></td>
-          <td>${r.repoBName || 'N/A'}</td>
-          <td><a href="${r.repoBUrl || '#'}">${r.repoBUrl || 'N/A'}</a></td>
-          <td>${r.fileA || 'N/A'}</td>
-          <td>${r.fileB || 'N/A'}</td>
-          <td>${r.similarity !== undefined ? r.similarity : 'N/A'}</td>
-          <td><pre>${r.snippetA || 'N/A'}</pre></td>
-          <td><pre>${r.snippetB || 'N/A'}</pre></td>
-        </tr>
-      `);
-    });
-  });
-  stream.end();
+  const rows = results.map((repoResult) =>
+    repoResult.map((r) => `
+      <tr class="${r.similarity > 80 ? 'high' : ''}">
+        <td>${r.repoAName || 'N/A'}</td>
+        <td><a href="${r.repoAUrl || '#'}">${r.repoAUrl || 'N/A'}</a></td>
+        <td>${r.repoBName || 'N/A'}</td>
+        <td><a href="${r.repoBUrl || '#'}">${r.repoBUrl || 'N/A'}</a></td>
+        <td>${r.fileA || 'N/A'}</td>
+        <td>${r.fileB || 'N/A'}</td>
+        <td>${r.similarity !== undefined ? r.similarity : 'N/A'}</td>
+        <td><pre>${r.snippetA || 'N/A'}</pre></td>
+        <td><pre>${r.snippetB || 'N/A'}</pre></td>
+      </tr>
+    `).join('')
+  ).join('');
 
-  console.log(`✅ Report updated at: ${reportPath}`);
-  return reportPath; // Return the path to the generated report
+  fs.appendFileSync(reportPath, rows);
+  console.log(`✅ Appended rows to report at: ${reportPath}`);
 }
 
 // Finalize the report by closing the HTML structure
 export async function finalizeReport() {
   const tempDir = os.tmpdir();
-  const reportPath = path.resolve(tempDir, 'report.html');
+  const reportPath = path.join(tempDir, 'report.html');
 
-  const stream = fs.createWriteStream(reportPath, { flags: 'a' }); // Open in append mode
-  stream.write(`
+  const closingContent = `
           </tbody>
         </table>
       </body>
     </html>
-  `);
-  stream.end();
-
-  console.log(`✅ Report finalized at: ${reportPath}`);
-  return reportPath;
+  `;
+  fs.appendFileSync(reportPath, closingContent);
+  console.log(`✅ Finalized report at: ${reportPath}`);
 }
