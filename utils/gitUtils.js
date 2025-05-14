@@ -25,7 +25,6 @@ export async function cloneRepos(repoAUrl, repoBUrl) {
 
   console.log(`Cloning ${repoBUrl} into ${repoBPath}`);
   await git.clone(repoBUrl, repoBPath);
-  console.log("somejebdjbj",repoAUrl)
 
   return { repoAPath, repoBPath, repoAName, repoBName, repoAUrl, repoBUrl };
 }

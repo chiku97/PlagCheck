@@ -39,7 +39,7 @@ app.post('/compare', async (req, res) => {
       for (let j = i + 1; j < repoUrls.length; j++) {
         try {
           const { repoAPath, repoBPath, repoAName, repoBName, repoAUrl, repoBUrl } = await cloneRepos(repoUrls[i], repoUrls[j]);
-          console.log("somethi gbahsbdakbshj", repoBName)
+
           const matches = await compareRepos(repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl);
 
           await generateReport([matches], isFirstBatch);

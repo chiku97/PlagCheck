@@ -87,7 +87,7 @@ function getSimilarity(codeA, codeB) {
   return similarity;
 }
 
-export async function compareRepos(repoAPath, repoBPath) {
+export async function compareRepos(repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl) {
   const filesA = glob.sync('**/*.{js,html,css,png,jpg,jpeg,gif,svg}', { cwd: repoAPath });
   const filesB = glob.sync('**/*.{js,html,css,png,jpg,jpeg,gif,svg}', { cwd: repoBPath });
 
@@ -115,6 +115,10 @@ export async function compareRepos(repoAPath, repoBPath) {
           matches.push({
             fileA,
             fileB,
+            repoAName,
+            repoAUrl,
+            repoBName,
+            repoBUrl,
             similarity: 100,
             snippetA: 'Binary file (e.g., image)',
             snippetB: 'Binary file (e.g., image)',
@@ -136,6 +140,10 @@ export async function compareRepos(repoAPath, repoBPath) {
               matches.push({
                 fileA,
                 fileB,
+                repoAName,
+                repoAUrl,
+                repoBName,
+                repoBUrl,
                 similarity: similarity.toFixed(2),
                 snippetA: fA.slice(0, 200),
                 snippetB: fB.slice(0, 200),
@@ -149,6 +157,10 @@ export async function compareRepos(repoAPath, repoBPath) {
           matches.push({
             fileA,
             fileB,
+            repoAName,
+            repoAUrl,
+            repoBName,
+            repoBUrl,
             similarity: similarity.toFixed(2),
             snippetA: codeA.slice(0, 200),
             snippetB: codeB.slice(0, 200),
@@ -170,6 +182,10 @@ export function checkSimilarity(fileA, fileB, codeA, codeB, matches) {
         matches.push({
           fileA,
           fileB,
+          repoAName,
+            repoAUrl,
+            repoBName,
+            repoBUrl,
           similarity: similarity.toFixed(2),
           snippetA: codeA.slice(0, 200),
           snippetB: codeB.slice(0, 200),
