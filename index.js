@@ -4,7 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { cloneRepos } from './utils/gitUtils.js';
 import { compareRepos } from './utils/compareUtils.js';
-import { generateReport, finalizeReport } from './utils/reportUtils.js'; // Added finalizeReport import
+import { generateReport, finalizeReport, reportContent } from './utils/reportUtils.js'; // Added finalizeReport import
 import os from 'os'; // Import os module for temp directory
 
 const __filename = fileURLToPath(import.meta.url);
@@ -38,7 +38,7 @@ app.post('/compare', async (req, res) => {
     for (let i = 0; i < repoUrls.length; i++) {
       for (let j = i + 1; j < repoUrls.length; j++) {
         try {
-          const { repoAPath, repoBPath, repoAName, repoBName, repoAUrl, repoBUrl } = await cloneRepos(repoUrls[i], repoUrls[j]);
+          const { repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl } = await cloneRepos(repoUrls[i], repoUrls[j]);
 
           const matches = await compareRepos(repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl);
 
@@ -60,15 +60,11 @@ app.post('/compare', async (req, res) => {
 
 // Serve the report
 app.get('/report', (req, res) => {
-  const tempDir = os.tmpdir();
-  const reportPath = path.join(tempDir, 'report.html');
-
-  console.log(`📄 Serving report from: ${reportPath}`);
-
-  if (fs.existsSync(reportPath)) {
-    res.sendFile(reportPath);
+  if (reportContent) {
+    res.setHeader('Content-Type', 'text/html');
+    res.send(reportContent);
   } else {
-    console.error('❌ Report not found');
+    console.error('❌ Report content not found');
     res.status(404).send('<h1>Report not found</h1>');
   }
 });

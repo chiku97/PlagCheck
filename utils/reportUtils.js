@@ -2,12 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os'; // Import os module for temp directory
 
-export async function generateReport(results, isFirstBatch = false) {
-  const tempDir = os.tmpdir();
-  const reportPath = path.join(tempDir, 'report.html');
+export let reportContent = ''; // Store the report content in memory
 
+export async function generateReport(results, isFirstBatch = false) {
   if (isFirstBatch) {
-    const initialContent = `
+    reportContent = `
       <html>
         <head>
           <title>Repository Comparison Report</title>
@@ -37,8 +36,7 @@ export async function generateReport(results, isFirstBatch = false) {
             </thead>
             <tbody>
     `;
-    fs.writeFileSync(reportPath, initialContent);
-    console.log(`✅ Initialized report at: ${reportPath}`);
+    console.log(`✅ Initialized report content.`);
   }
 
   const rows = results.map((repoResult) =>
@@ -57,21 +55,17 @@ export async function generateReport(results, isFirstBatch = false) {
     `).join('')
   ).join('');
 
-  fs.appendFileSync(reportPath, rows);
-  console.log(`✅ Appended rows to report at: ${reportPath}`);
+  reportContent += rows;
+  console.log(`✅ Appended rows to report content.`);
 }
 
-// Finalize the report by closing the HTML structure
 export async function finalizeReport() {
-  const tempDir = os.tmpdir();
-  const reportPath = path.join(tempDir, 'report.html');
-
   const closingContent = `
           </tbody>
         </table>
       </body>
     </html>
   `;
-  fs.appendFileSync(reportPath, closingContent);
-  console.log(`✅ Finalized report at: ${reportPath}`);
+  reportContent += closingContent;
+  console.log(`✅ Finalized report content.`);
 }
