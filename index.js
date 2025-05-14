@@ -60,7 +60,7 @@ app.post('/compare', async (req, res) => {
 
 // Serve the report
 app.get('/report', (req, res) => {
-  const reportPath = path.resolve('reports', 'report.html'); // Use os.tmpdir() for the temp directory
+  const reportPath = path.resolve('./reports', 'report.html'); // Use os.tmpdir() for the temp directory
   if (fs.existsSync(reportPath)) {
     res.sendFile(reportPath);
   } else {
