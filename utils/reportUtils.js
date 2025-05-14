@@ -5,7 +5,7 @@ import os from 'os'; // Import os module for temp directory
 export async function generateReport(results, isFirstBatch = false) {
   // Use os.tmpdir() for a cross-platform temporary directory
   const tempDir = os.tmpdir();
-  const reportPath = path.resolve('reports', 'report.html'); // Generate the report in the temp directory
+  const reportPath = path.resolve('reports','..', 'report.html'); // Generate the report in the temp directory
 
   // If this is the first batch, initialize the report with the HTML structure
   if (isFirstBatch) {
