@@ -6,13 +6,10 @@
   <title>Repository Comparison</title>
 </head>
 <body>
-  <h1>Compare Two Repositories</h1>
+  <h1>Compare Multiple Repositories</h1>
   <form action="/compare" method="POST">
-    <label for="repoA">Repository A URL:</label>
-    <input type="url" id="repoA" name="repoA" required>
-    <br><br>
-    <label for="repoB">Repository B URL:</label>
-    <input type="url" id="repoB" name="repoB" required>
+    <label for="repos">Enter GitHub Repository URLs (comma-separated):</label>
+    <textarea id="repos" name="repos" rows="5" cols="50" placeholder="https://github.com/user/repo1, https://github.com/user/repo2" required></textarea>
     <br><br>
     <button type="submit">Compare</button>
   </form>
