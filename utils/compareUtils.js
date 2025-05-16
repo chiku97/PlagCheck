@@ -1,4 +1,4 @@
-import esprima from 'esprima';
+import { parse } from '@babel/parser';
 import { glob } from 'glob';
 import fs from 'fs';
 import path from 'path';
@@ -6,25 +6,28 @@ import path from 'path';
 function extractFunctions(code) {
   const functions = [];
   try {
-    const tree = esprima.parseScript(code, { range: true });
+    const tree = parse(code, {
+      sourceType: 'module',
+      plugins: ['jsx', 'typescript'], // Enable JSX and TypeScript parsing
+    });
 
-    tree.body.forEach((node) => {
+    tree.program.body.forEach((node) => {
       if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression' || node.type === 'ArrowFunctionExpression') {
-        const codeSegment = code.slice(...node.range);
+        const codeSegment = code.slice(node.start, node.end);
         functions.push(codeSegment);
       } else if (node.type === 'VariableDeclaration') {
         // Handle arrow functions assigned to variables
         node.declarations.forEach((declaration) => {
           if (declaration.init && (declaration.init.type === 'ArrowFunctionExpression' || declaration.init.type === 'FunctionExpression')) {
-            const codeSegment = code.slice(...declaration.init.range);
+            const codeSegment = code.slice(declaration.init.start, declaration.init.end);
             functions.push(codeSegment);
           }
         });
       } else if (node.type === 'ClassDeclaration') {
         // Handle class methods
         node.body.body.forEach((method) => {
-          if (method.type === 'MethodDefinition') {
-            const codeSegment = code.slice(...method.range);
+          if (method.type === 'ClassMethod') {
+            const codeSegment = code.slice(method.start, method.end);
             functions.push(codeSegment);
           }
         });
@@ -48,6 +51,11 @@ function normalize(code) {
   const normalized = code
     .replace(/\/\/.*$/gm, '') // Remove single-line comments
     .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+    .replace(/import\s+.*?;/g, '') // Remove import statements
+    .replace(/export\s+.*?;/g, '') // Remove export statements
+    .replace(/class\s+\w+\s+extends\s+React\.Component/g, '') // Remove React class boilerplate
+    .replace(/React\.createElement/g, '') // Remove React.createElement boilerplate
+    .replace(/<[^>]+>/g, '') // Remove JSX tags
     .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
     .trim();
 
@@ -173,7 +181,6 @@ export async function compareRepos(repoAPath, repoBPath, repoAName, repoAUrl, re
   console.log("Matches Found:", matches);
   return matches;
 }
-
 
 export function checkSimilarity(fileA, fileB, codeA, codeB, matches) {
     if (/\.(html|css)$/.test(fileA)) {

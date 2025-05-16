@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
 import { cloneRepos } from './utils/gitUtils.js';
 import { compareRepos } from './utils/compareUtils.js';
@@ -18,7 +18,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
 // Serve the form
-app.get('/', (req, res) => {
+const baseDir = path.join('repos', '..', 'repos');
+await fs.remove(baseDir)
+app.get('/', async(req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
 
@@ -35,20 +37,20 @@ app.post('/compare', async (req, res) => {
 
     let isFirstBatch = true;
 
-    for (let i = 0; i < repoUrls.length; i++) {
-      for (let j = i + 1; j < repoUrls.length; j++) {
+    // for (let i = 0; i < repoUrls.length; i++) {
+      for (let j = 1; j < repoUrls.length; j++) {
         try {
-          const { repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl } = await cloneRepos(repoUrls[i], repoUrls[j]);
+          const { repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl } = await cloneRepos(repoUrls[0], repoUrls[j]);
 
           const matches = await compareRepos(repoAPath, repoBPath, repoAName, repoAUrl, repoBName, repoBUrl);
 
           await generateReport([matches], isFirstBatch);
           isFirstBatch = false;
         } catch (error) {
-          console.error(`Error processing repositories: ${repoUrls[i]} and ${repoUrls[j]}`, error);
+          console.error(`Error processing repositories: ${repoUrls[0]} and ${repoUrls[j]}`, error);
         }
       }
-    }
+    // }
 
     await finalizeReport();
     res.redirect('/report');
